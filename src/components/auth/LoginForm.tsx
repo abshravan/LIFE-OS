@@ -112,16 +112,32 @@ export default function LoginForm() {
         </button>
       </form>
 
-      <div className="mt-6 pt-4 border-t border-[var(--sys-border)] text-center">
-        <p className="text-xs text-[var(--sys-muted)]">
-          No system profile?{" "}
-          <Link
-            href="/register"
-            className="text-[var(--sys-cyan)] hover:opacity-80 transition-opacity"
-          >
-            Initialize Account
-          </Link>
-        </p>
+      <div className="mt-6 pt-4 border-t border-[var(--sys-border)] space-y-3">
+        <div className="text-center">
+          <p className="text-xs text-[var(--sys-muted)]">
+            No system profile?{" "}
+            <Link
+              href="/register"
+              className="text-[var(--sys-cyan)] hover:opacity-80 transition-opacity"
+            >
+              Initialize Account
+            </Link>
+          </p>
+        </div>
+
+        {/* Demo mode entry */}
+        <Link
+          href="/demo"
+          className={cn(
+            "flex items-center justify-center gap-2 w-full py-2 rounded-md",
+            "border border-dashed border-[var(--sys-border)]",
+            "text-[10px] tracking-[0.2em] text-[var(--sys-muted)] uppercase",
+            "hover:border-[var(--sys-amber)]/40 hover:text-[var(--sys-amber)] transition-colors"
+          )}
+        >
+          <span className="text-[var(--sys-amber)]">◈</span>
+          VIEW LIVE DEMO — no account required
+        </Link>
       </div>
     </div>
   );

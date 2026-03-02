@@ -8,6 +8,10 @@ const AUTH_ROUTES = ["/login", "/register"];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // Demo routes are always public — skip all auth logic
+  if (pathname.startsWith("/demo")) return NextResponse.next();
+
   const token = request.cookies.get("lifeos_token")?.value;
 
   const isProtected = PROTECTED_ROUTES.some((r) => pathname.startsWith(r));
