@@ -12,6 +12,8 @@ import WeeklyReportCard from "./WeeklyReportCard";
 
 interface AnalyticsViewProps {
   data: AnalyticsData;
+  /** Override the regenerate handler (e.g. no-op in demo mode). */
+  onRegenerate?: () => Promise<void>;
 }
 
 const FADE_UP = (delay: number) => ({
@@ -20,12 +22,17 @@ const FADE_UP = (delay: number) => ({
   transition: { delay, duration: 0.3 },
 });
 
-export default function AnalyticsView({ data }: AnalyticsViewProps) {
+export default function AnalyticsView({ data, onRegenerate: onRegenerateProp }: AnalyticsViewProps) {
   const [weeklyReport, setWeeklyReport] = useState<SerializableWeeklyReport | null>(
     data.weeklyReport
   );
 
   async function handleRegenerate() {
+    if (onRegenerateProp) {
+      await onRegenerateProp();
+      return;
+    }
+
     const res = await fetch("/api/weekly-report", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
