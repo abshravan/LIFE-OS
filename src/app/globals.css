@@ -1,0 +1,115 @@
+@import "tailwindcss";
+
+/* ============================================================
+   LifeOS — Global Styles
+   Design language: dark system dashboard, cyan accents
+   ============================================================ */
+
+:root {
+  /* System palette */
+  --sys-bg:       #0B0F19;
+  --sys-surface:  #111827;
+  --sys-border:   #1F2937;
+  --sys-text:     #E2E8F0;
+  --sys-muted:    #6B7280;
+  --sys-cyan:     #06B6D4;
+  --sys-cyan-dim: #0E7490;
+  --sys-green:    #10B981;
+  --sys-red:      #EF4444;
+  --sys-amber:    #F59E0B;
+
+  /* Glow utilities */
+  --glow-cyan:    0 0 12px rgba(6, 182, 212, 0.35);
+  --glow-green:   0 0 12px rgba(16, 185, 129, 0.35);
+  --glow-red:     0 0 12px rgba(239, 68, 68, 0.35);
+}
+
+@theme inline {
+  --color-background:   var(--sys-bg);
+  --color-foreground:   var(--sys-text);
+  --color-surface:      var(--sys-surface);
+  --color-border:       var(--sys-border);
+  --color-accent:       var(--sys-cyan);
+  --color-muted:        var(--sys-muted);
+  --color-success:      var(--sys-green);
+  --color-danger:       var(--sys-red);
+  --color-warning:      var(--sys-amber);
+  --font-sans:          var(--font-geist-sans);
+  --font-mono:          var(--font-geist-mono);
+}
+
+/* Base resets */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--sys-bg);
+  color: var(--sys-text);
+  font-family: var(--font-geist-mono), "JetBrains Mono", "Fira Code", monospace;
+  line-height: 1.6;
+  min-height: 100dvh;
+}
+
+/* System grid overlay (subtle background texture) */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(6, 182, 212, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(6, 182, 212, 0.02) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--sys-bg); }
+::-webkit-scrollbar-thumb { background: var(--sys-border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--sys-cyan-dim); }
+
+/* Focus ring — system-style */
+:focus-visible {
+  outline: 1.5px solid var(--sys-cyan);
+  outline-offset: 2px;
+}
+
+/* Selection */
+::selection {
+  background: rgba(6, 182, 212, 0.2);
+  color: var(--sys-text);
+}
+
+/* ── Utility classes ─────────────────────────────────────── */
+
+.glow-cyan  { box-shadow: var(--glow-cyan); }
+.glow-green { box-shadow: var(--glow-green); }
+.glow-red   { box-shadow: var(--glow-red); }
+
+.text-glow-cyan {
+  text-shadow: 0 0 8px rgba(6, 182, 212, 0.6);
+}
+
+/* System card */
+.sys-card {
+  background: var(--sys-surface);
+  border: 1px solid var(--sys-border);
+  border-radius: 8px;
+}
+
+/* Discipline score gradient */
+.score-gradient {
+  background: linear-gradient(135deg, #06B6D4, #3B82F6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}

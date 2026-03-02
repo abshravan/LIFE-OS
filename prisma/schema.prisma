@@ -1,0 +1,164 @@
+// ============================================================
+// LifeOS — Discipline & Consistency Tracking System
+// Database Schema — Phase 1
+// ============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─────────────────────────────────────────────
+// AUTH & IDENTITY
+// ─────────────────────────────────────────────
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  username  String   @unique
+  password  String   // bcrypt-hashed
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  identity      Identity?
+  protocols     Protocol[]
+  dailyLogs     DailyLog[]
+  weeklyReports WeeklyReport[]
+
+  @@map("users")
+}
+
+/// Stores the user's self-definition and core motivation.
+/// Created once after registration (onboarding step).
+model Identity {
+  id         String   @id @default(cuid())
+  userId     String   @unique
+  targetSelf String   // "Who do you want to become?"
+  motivation String   // "Why does this matter?"
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("identities")
+}
+
+// ─────────────────────────────────────────────
+// PROTOCOLS
+// ─────────────────────────────────────────────
+
+/// A Protocol is a daily non-negotiable habit.
+/// Users define up to 3 active protocols.
+model Protocol {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  description String?
+  order       Int      @default(0) // display order (0–2)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  logs ProtocolLog[]
+
+  @@map("protocols")
+}
+
+// ─────────────────────────────────────────────
+// DAILY TRACKING
+// ─────────────────────────────────────────────
+
+/// One record per user per day. Anchors all daily data.
+model DailyLog {
+  id              String   @id @default(cuid())
+  userId          String
+  date            DateTime @db.Date
+  mood            Int?     // 1–10
+  energy          Int?     // 1–10
+  disciplineScore Float?   // 0–100, computed and cached
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  protocolLogs ProtocolLog[]
+
+  @@unique([userId, date])
+  @@map("daily_logs")
+}
+
+/// One record per protocol per day. Tracks completion status.
+model ProtocolLog {
+  id          String    @id @default(cuid())
+  userId      String
+  protocolId  String
+  dailyLogId  String
+  date        DateTime  @db.Date
+  completed   Boolean   @default(false)
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  protocol Protocol @relation(fields: [protocolId], references: [id], onDelete: Cascade)
+  dailyLog DailyLog @relation(fields: [dailyLogId], references: [id], onDelete: Cascade)
+  excuse   Excuse?
+
+  @@unique([protocolId, date])
+  @@map("protocol_logs")
+}
+
+// ─────────────────────────────────────────────
+// EXCUSE TRACKING
+// ─────────────────────────────────────────────
+
+enum ExcuseCategory {
+  TIRED
+  BUSY
+  PROCRASTINATED
+  LOW_MOOD
+  OTHER
+}
+
+/// When a protocol is missed, a user may log an excuse.
+/// Linked 1:1 to a ProtocolLog where completed = false.
+model Excuse {
+  id            String         @id @default(cuid())
+  protocolLogId String         @unique
+  category      ExcuseCategory
+  note          String?        // optional free text
+  createdAt     DateTime       @default(now())
+
+  protocolLog ProtocolLog @relation(fields: [protocolLogId], references: [id], onDelete: Cascade)
+
+  @@map("excuses")
+}
+
+// ─────────────────────────────────────────────
+// ANALYTICS & REPORTING
+// ─────────────────────────────────────────────
+
+/// Auto-generated system diagnostic report, created each Sunday.
+/// excuseBreakdown: { TIRED: 2, BUSY: 1, ... }
+/// suggestions: string[] of system-generated advice
+model WeeklyReport {
+  id                  String   @id @default(cuid())
+  userId              String
+  weekStart           DateTime @db.Date // Monday
+  weekEnd             DateTime @db.Date // Sunday
+  completionPercent   Float
+  weakestDay          String?  // e.g. "Monday"
+  mostSkippedProtocol String?  // protocol name
+  excuseBreakdown     Json     @default("{}")
+  suggestions         String[]
+  disciplineScore     Float
+  generatedAt         DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, weekStart])
+  @@map("weekly_reports")
+}
